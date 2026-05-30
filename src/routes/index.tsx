@@ -14,8 +14,11 @@ export const Route = createFileRoute("/")({
 function CoreDashboard() {
   const [brainDumpText, setBrainDumpText] = useState("");
   const [trainingDone, setTrainingDone] = useState(false);
+  const [retinolStatus, setRetinolStatus] = useState("БАРЬЕР: СТАБИЛЕН");
+  const [workStatus, setWorkStatus] = useState("ПАРСЕР: OK");
+  const [workMatches, setWorkMatches] = useState({ applied: 12, total: 25 });
 
-  const [calendarStats] = useState({
+  const [calendarStats, setCalendarStats] = useState({
     lastSync: "10 минут назад",
     connectedAccount: "your.email@domain.com",
     weeklyHours: { health: 6, work: 22, study: 15, art: 4 },
@@ -24,6 +27,10 @@ function CoreDashboard() {
   const [reviews, setReviews] = useState([
     { id: 1, date: "Сегодня", text: "Сдала базовые анализы, сделала МФР затылка. Изучила основы Few-shot промптинга." },
   ]);
+
+  const [importOpen, setImportOpen] = useState(false);
+  const [importText, setImportText] = useState("");
+  const [importError, setImportError] = useState("");
 
   const handleBrainDumpSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,6 +43,38 @@ function CoreDashboard() {
     setReviews([newReview, ...reviews]);
     setBrainDumpText("");
   };
+
+  const handleImportSubmit = () => {
+    setImportError("");
+    try {
+      const data = JSON.parse(importText);
+      if (data.calendar?.weeklyHours) {
+        setCalendarStats((s) => ({
+          ...s,
+          lastSync: data.calendar.lastSync ?? "только что",
+          connectedAccount: data.calendar.connectedAccount ?? s.connectedAccount,
+          weeklyHours: { ...s.weeklyHours, ...data.calendar.weeklyHours },
+        }));
+      }
+      if (typeof data.health?.retinolStatus === "string") setRetinolStatus(data.health.retinolStatus);
+      if (typeof data.health?.trainingDone === "boolean") setTrainingDone(data.health.trainingDone);
+      if (typeof data.work?.parserStatus === "string") setWorkStatus(data.work.parserStatus);
+      if (data.work?.matches) setWorkMatches({ ...workMatches, ...data.work.matches });
+      if (Array.isArray(data.log)) {
+        const entries = data.log.map((t: string, i: number) => ({
+          id: Date.now() + i,
+          date: new Date().toLocaleDateString("ru-RU"),
+          text: t,
+        }));
+        setReviews((r) => [...entries, ...r]);
+      }
+      setImportText("");
+      setImportOpen(false);
+    } catch (err) {
+      setImportError("Невалидный JSON. Проверь синтаксис.");
+    }
+  };
+
 
   const totalHours =
     calendarStats.weeklyHours.health +
@@ -98,7 +137,7 @@ function CoreDashboard() {
           <div>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-sm font-bold tracking-widest uppercase text-emerald-400">01 // HEALTH (Bio-Architecture)</h2>
-              <span className="text-[10px] bg-emerald-950 text-emerald-400 px-2 py-0.5 border border-emerald-800">БАРЬЕР: СТАБИЛЕН</span>
+              <span className="text-[10px] bg-emerald-950 text-emerald-400 px-2 py-0.5 border border-emerald-800">{retinolStatus}</span>
             </div>
             <div className="space-y-3 text-xs">
               <div className="border-l-2 border-zinc-700 pl-3 text-white">ВЕЧЕР: Retinol 0.2% + Крем Marine Collagen</div>
@@ -126,7 +165,7 @@ function CoreDashboard() {
           <div>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-sm font-bold tracking-widest uppercase text-sky-400">02 // WORK (NGO Operations)</h2>
-              <span className="text-[10px] bg-sky-950 text-sky-400 px-2 py-0.5 border border-sky-800">ПАРСЕР: OK</span>
+              <span className="text-[10px] bg-sky-950 text-sky-400 px-2 py-0.5 border border-sky-800">{workStatus}</span>
             </div>
             <div className="space-y-3 text-xs">
               <div className="flex flex-wrap gap-1.5">
@@ -142,7 +181,7 @@ function CoreDashboard() {
           </div>
           <div className="mt-6 pt-4 border-t border-zinc-800/60 flex items-center justify-between text-[10px]">
             <span className="text-zinc-500">КОНВЕРСИЯ ОТКЛИКОВ</span>
-            <span className="text-white font-bold">12 / 25 ВАКАНСИЙ</span>
+            <span className="text-white font-bold">{workMatches.applied} / {workMatches.total} ВАКАНСИЙ</span>
           </div>
         </section>
 
@@ -219,7 +258,15 @@ function CoreDashboard() {
 
       {/* HISTORY LOG */}
       <section className="max-w-7xl mx-auto border border-zinc-800 bg-[#12161A] p-6">
-        <h2 className="text-sm font-bold tracking-widest uppercase text-zinc-500 mb-4">// HISTORY LOG</h2>
+        <div className="flex justify-between items-center mb-4 gap-2">
+          <h2 className="text-sm font-bold tracking-widest uppercase text-zinc-500">// HISTORY LOG</h2>
+          <button
+            onClick={() => setImportOpen(true)}
+            className="text-[10px] uppercase tracking-widest border border-zinc-700 text-white px-3 py-1.5 hover:border-white transition-all font-bold"
+          >
+            [+] ИМПОРТ ДАННЫХ ИЗ AI
+          </button>
+        </div>
         <div className="space-y-3">
           {reviews.map((log) => (
             <div key={log.id} className="text-xs border-b border-zinc-900 pb-2 last:border-0">
@@ -229,6 +276,56 @@ function CoreDashboard() {
           ))}
         </div>
       </section>
+
+      {/* IMPORT MODAL */}
+      {importOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 flex items-start md:items-center justify-center p-4 overflow-y-auto"
+          onClick={() => setImportOpen(false)}
+        >
+          <div
+            className="w-full max-w-2xl bg-[#0D0F12] border border-zinc-700 p-6 my-8 font-mono"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h3 className="text-sm font-bold tracking-widest uppercase text-white">// AI DATA IMPORT</h3>
+                <p className="text-[10px] text-zinc-500 mt-1">Вставь JSON от ассистента — дашборд обновится мгновенно.</p>
+              </div>
+              <button
+                onClick={() => setImportOpen(false)}
+                className="text-zinc-500 hover:text-white text-xs uppercase"
+              >
+                [ESC]
+              </button>
+            </div>
+            <textarea
+              value={importText}
+              onChange={(e) => setImportText(e.target.value)}
+              placeholder={`{\n  "calendar": { "lastSync": "только что", "weeklyHours": { "health": 8, "work": 24, "study": 18, "art": 5 } },\n  "health": { "retinolStatus": "БАРЬЕР: УКРЕПЛЁН", "trainingDone": true },\n  "work": { "parserStatus": "ПАРСЕР: 3 НОВЫХ", "matches": { "applied": 14, "total": 28 } },\n  "log": ["Обновила протокол ретинола", "Подала 2 заявки"]\n}`}
+              className="w-full bg-[#12161A] border border-zinc-800 p-3 text-[11px] text-white placeholder-zinc-700 h-64 resize-none focus:border-white focus:outline-none font-mono leading-relaxed"
+              spellCheck={false}
+            />
+            {importError && (
+              <div className="text-[10px] text-red-400 mt-2 uppercase tracking-wider">{importError}</div>
+            )}
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={() => { setImportOpen(false); setImportText(""); setImportError(""); }}
+                className="text-[10px] uppercase tracking-widest border border-zinc-800 text-zinc-400 px-4 py-2 hover:border-zinc-600 font-bold"
+              >
+                Отмена
+              </button>
+              <button
+                onClick={handleImportSubmit}
+                className="text-[10px] uppercase tracking-widest bg-white text-black px-4 py-2 hover:bg-zinc-200 font-bold"
+              >
+                Применить поток
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
