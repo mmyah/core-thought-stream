@@ -181,7 +181,7 @@ function CoreDashboard() {
           </div>
           <div className="mt-6 pt-4 border-t border-zinc-800/60 flex items-center justify-between text-[10px]">
             <span className="text-zinc-500">КОНВЕРСИЯ ОТКЛИКОВ</span>
-            <span className="text-white font-bold">12 / 25 ВАКАНСИЙ</span>
+            <span className="text-white font-bold">{workMatches.applied} / {workMatches.total} ВАКАНСИЙ</span>
           </div>
         </section>
 
