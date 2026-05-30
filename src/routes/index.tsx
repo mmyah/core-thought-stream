@@ -165,7 +165,7 @@ function CoreDashboard() {
           <div>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-sm font-bold tracking-widest uppercase text-sky-400">02 // WORK (NGO Operations)</h2>
-              <span className="text-[10px] bg-sky-950 text-sky-400 px-2 py-0.5 border border-sky-800">ПАРСЕР: OK</span>
+              <span className="text-[10px] bg-sky-950 text-sky-400 px-2 py-0.5 border border-sky-800">{workStatus}</span>
             </div>
             <div className="space-y-3 text-xs">
               <div className="flex flex-wrap gap-1.5">
