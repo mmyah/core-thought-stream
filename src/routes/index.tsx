@@ -14,8 +14,11 @@ export const Route = createFileRoute("/")({
 function CoreDashboard() {
   const [brainDumpText, setBrainDumpText] = useState("");
   const [trainingDone, setTrainingDone] = useState(false);
+  const [retinolStatus, setRetinolStatus] = useState("БАРЬЕР: СТАБИЛЕН");
+  const [workStatus, setWorkStatus] = useState("ПАРСЕР: OK");
+  const [workMatches, setWorkMatches] = useState({ applied: 12, total: 25 });
 
-  const [calendarStats] = useState({
+  const [calendarStats, setCalendarStats] = useState({
     lastSync: "10 минут назад",
     connectedAccount: "your.email@domain.com",
     weeklyHours: { health: 6, work: 22, study: 15, art: 4 },
@@ -24,6 +27,10 @@ function CoreDashboard() {
   const [reviews, setReviews] = useState([
     { id: 1, date: "Сегодня", text: "Сдала базовые анализы, сделала МФР затылка. Изучила основы Few-shot промптинга." },
   ]);
+
+  const [importOpen, setImportOpen] = useState(false);
+  const [importText, setImportText] = useState("");
+  const [importError, setImportError] = useState("");
 
   const handleBrainDumpSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,6 +43,38 @@ function CoreDashboard() {
     setReviews([newReview, ...reviews]);
     setBrainDumpText("");
   };
+
+  const handleImportSubmit = () => {
+    setImportError("");
+    try {
+      const data = JSON.parse(importText);
+      if (data.calendar?.weeklyHours) {
+        setCalendarStats((s) => ({
+          ...s,
+          lastSync: data.calendar.lastSync ?? "только что",
+          connectedAccount: data.calendar.connectedAccount ?? s.connectedAccount,
+          weeklyHours: { ...s.weeklyHours, ...data.calendar.weeklyHours },
+        }));
+      }
+      if (typeof data.health?.retinolStatus === "string") setRetinolStatus(data.health.retinolStatus);
+      if (typeof data.health?.trainingDone === "boolean") setTrainingDone(data.health.trainingDone);
+      if (typeof data.work?.parserStatus === "string") setWorkStatus(data.work.parserStatus);
+      if (data.work?.matches) setWorkMatches({ ...workMatches, ...data.work.matches });
+      if (Array.isArray(data.log)) {
+        const entries = data.log.map((t: string, i: number) => ({
+          id: Date.now() + i,
+          date: new Date().toLocaleDateString("ru-RU"),
+          text: t,
+        }));
+        setReviews((r) => [...entries, ...r]);
+      }
+      setImportText("");
+      setImportOpen(false);
+    } catch (err) {
+      setImportError("Невалидный JSON. Проверь синтаксис.");
+    }
+  };
+
 
   const totalHours =
     calendarStats.weeklyHours.health +
