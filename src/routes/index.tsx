@@ -137,7 +137,7 @@ function CoreDashboard() {
           <div>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-sm font-bold tracking-widest uppercase text-emerald-400">01 // HEALTH (Bio-Architecture)</h2>
-              <span className="text-[10px] bg-emerald-950 text-emerald-400 px-2 py-0.5 border border-emerald-800">БАРЬЕР: СТАБИЛЕН</span>
+              <span className="text-[10px] bg-emerald-950 text-emerald-400 px-2 py-0.5 border border-emerald-800">{retinolStatus}</span>
             </div>
             <div className="space-y-3 text-xs">
               <div className="border-l-2 border-zinc-700 pl-3 text-white">ВЕЧЕР: Retinol 0.2% + Крем Marine Collagen</div>
