@@ -258,14 +258,22 @@ function CoreDashboard() {
 
       {/* HISTORY LOG */}
       <section className="max-w-7xl mx-auto border border-zinc-800 bg-[#12161A] p-6">
-        <div className="flex justify-between items-center mb-4 gap-2">
+        <div className="flex justify-between items-center mb-4 gap-2 flex-wrap">
           <h2 className="text-sm font-bold tracking-widest uppercase text-zinc-500">// HISTORY LOG</h2>
-          <button
-            onClick={() => setImportOpen(true)}
-            className="text-[10px] uppercase tracking-widest border border-zinc-700 text-white px-3 py-1.5 hover:border-white transition-all font-bold"
-          >
-            [+] ИМПОРТ ДАННЫХ ИЗ AI
-          </button>
+          <div className="flex gap-2 flex-wrap">
+            <button
+              onClick={handleExportJson}
+              className="text-[10px] uppercase tracking-widest border border-zinc-700 text-white px-3 py-1.5 hover:border-white transition-all font-bold"
+            >
+              [↓] ЭКСПОРТ JSON
+            </button>
+            <button
+              onClick={() => setImportOpen(true)}
+              className="text-[10px] uppercase tracking-widest border border-zinc-700 text-white px-3 py-1.5 hover:border-white transition-all font-bold"
+            >
+              [+] ИМПОРТ ДАННЫХ ИЗ AI
+            </button>
+          </div>
         </div>
         <div className="space-y-3">
           {reviews.map((log) => (
