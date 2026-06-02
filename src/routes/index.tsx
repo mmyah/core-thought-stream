@@ -75,6 +75,25 @@ function CoreDashboard() {
     }
   };
 
+  const handleExportJson = () => {
+    const payload = {
+      calendar: calendarStats,
+      health: { retinolStatus, trainingDone },
+      work: { parserStatus: workStatus, matches: workMatches },
+      log: reviews.map((r) => `${r.date}: ${r.text}`),
+      exportedAt: new Date().toISOString(),
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `core4-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
 
   const totalHours =
     calendarStats.weeklyHours.health +
