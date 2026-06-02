@@ -12,7 +12,7 @@ export const Route = createFileRoute("/")({
 });
 
 // URL твоего будущего Google Apps Script (заменишь после развертывания скрипта)
-const GOOGLE_SCRIPT_API = "https://script.google.com/macros/s/AKfycbzKD7zptpHrUD6_pqr6AMqsiQ455hghf_zDYCWuhTReISZ0sOuE7OjC9rBHo2kbLaSDHQ/exec";
+const GOOGLE_SCRIPT_API = "https://script.google.com/macros/s/AKfycbxm8c9Hs7YvVJPHuMJDHPylBY1imQqxH_0KKuNhrdwL6REyZG-mGBjQDRPBuTh5jOaa/exec";
 
 function CoreDashboard() {
   const [brainDumpText, setBrainDumpText] = useState("");
