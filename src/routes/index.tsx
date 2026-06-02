@@ -308,6 +308,12 @@ function CoreDashboard() {
               [↓] ЭКСПОРТ JSON
             </button>
             <button
+              onClick={handleExportCsv}
+              className="text-[10px] uppercase tracking-widest border border-zinc-700 text-white px-3 py-1.5 hover:border-white transition-all font-bold"
+            >
+              [↓] ЭКСПОРТ CSV
+            </button>
+            <button
               onClick={() => setImportOpen(true)}
               className="text-[10px] uppercase tracking-widest border border-zinc-700 text-white px-3 py-1.5 hover:border-white transition-all font-bold"
             >
